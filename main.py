@@ -1,4 +1,7 @@
 import random as rn
+import tkinter
+import tkinter.ttk
+
 import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import *
@@ -330,41 +333,71 @@ minimum_population_size = 500
 maximum_population_size = 1000
 
 # Graphical interface Python. 27/03/2023
-def button_clicked():
-    print('Button clicked')
-    logging.info("Botón 3 pulsado.")
+
+class Window(tkinter.Frame):
+
+    def __init__(self, master):
+        super().__init__(master)
+
+        master.title("Prueba JVS")
+        master.geometry("600x600")
+        self.frame = Frame(master)
+        self.frame.pack()
+
+        leftframe = Frame(master)
+        leftframe.pack(side=LEFT)
+
+        rightframe = Frame(master)
+        rightframe.pack(side=RIGHT)
+
+        label = Label(self.frame, text="Genetic JVS App")
+        label.pack()
+
+        button1 = Button(leftframe, text="Botón +", height=5, width=10, command=self.increment)
+        button1.pack(padx=30, pady=3)
+        button2 = Button(leftframe, text="Valor", height=5, width=10, command=self.display)
+        button2.pack(padx=30, pady=3)
+        button3 = Button(rightframe, text="Generar", height=5, width=10, command=self.button_clicked)
+        button3.pack(padx=30, pady=3)
+
+        #self.frame = tkinter.Frame(self.master)
+        # Barra de progreso.
+        self.progressBar = tkinter.ttk.Progressbar(self.frame, length=500)
+        self.progressBar.configure(maximum=200)
+        self.progressBar.pack(padx=10, pady=50)
+
+        self.frame.pack(padx=50, pady=5)
+
+    def increment(self):
+        self.progressBar.step(20)
+
+    def decrement(self):
+        self.progressBar.step(-20)
+
+    def reset(self):
+        self.progressBar["value"] = 0
+
+    def display(self):
+        print(self.progressBar["value"])
+        logging.info("Valor: %i", self.progressBar["value"])
+    def button_clicked(self):
+        print('Button clicked')
+        logging.info("Botón 3 pulsado.")
+        self.progressBar.step(5)
+
 
 logging.basicConfig(filename="../GeneticV2/log/geneticV2.log", level=logging.DEBUG,
 format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 logging.warning("Inicio GeneticLog write!!!")
 
 root = Tk()
-root.geometry("200x200")
-frame = Frame(root)
-frame.pack()
-
-leftframe = Frame(root)
-leftframe.pack(side=LEFT)
-
-rightframe = Frame(root)
-rightframe.pack(side=RIGHT)
-
-label = Label(frame, text="Hello world")
-label.pack()
-
-button1 = Button(leftframe, text="Button 1")
-button1.pack(padx=3, pady=3)
-button2 = Button(rightframe, text="Boton 2")
-button2.pack(padx=3, pady=3)
-button3 = Button(leftframe, text="Boton 3", command=button_clicked)
-button3.pack(padx=3, pady=3)
-
-root.title("Prueba JVS")
+window = Window(root)
 root.mainloop()
 
 
 # Create two reference solutions 
 # (this is used just to illustrate GAs)
+logging.info("")
 references = create_reference_solutions(chromosome_length, 2)
 
 # Create starting population
@@ -376,6 +409,7 @@ population = create_population(starting_population_size, chromosome_length)
 for generation in range(maximum_generation):
     if generation % 10 == 0:
         print('Generation (out of %i): %i ' % (maximum_generation, generation))
+        logging.info('Generation (out of %i): %i ' % (maximum_generation, generation))
 
     # Brred
     population = breed_population(population)
@@ -393,6 +427,7 @@ population_ids = np.arange(population.shape[0]).astype(int)
 pareto_front = identify_pareto(scores, population_ids)
 population = population[pareto_front, :]
 scores = scores[pareto_front]
+logging.info('Valores de Pareto obtenidos.')
 
 # Plot Pareto front (for two scores only)  
 x = scores[:, 0] / chromosome_length * 100
@@ -401,5 +436,6 @@ plt.xlabel('Objective A - % maximum obtainable')
 plt.ylabel('Objective B - % maximum obtainable')
 
 plt.scatter(x, y)
-plt.savefig('pareto.png')
+plt.savefig('../GeneticV2/output/pareto.png')
 plt.show()
+logging.info('Fin después de ploteo Pareto')
