@@ -1,11 +1,14 @@
 import random as rn
 import tkinter
 import tkinter.ttk
-
+import os
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from tkinter import *
 import logging
+import sqlite3
+
 
 # For use in Jupyter notebooks only:
 
@@ -332,6 +335,7 @@ maximum_generation = 250
 minimum_population_size = 500
 maximum_population_size = 1000
 
+
 # Graphical interface Python. 27/03/2023
 
 class Window(tkinter.Frame):
@@ -360,9 +364,9 @@ class Window(tkinter.Frame):
         button3 = Button(rightframe, text="Generar", height=5, width=10, command=self.button_clicked)
         button3.pack(padx=30, pady=3)
 
-        #self.frame = tkinter.Frame(self.master)
+        # self.frame = tkinter.Frame(self.master)
         # Barra de progreso.
-        self.progressBar = tkinter.ttk.Progressbar(self.frame, length=500)
+        self.progressBar = tkinter.ttk.Progressbar(self.frame, mode='determinate', length=500)
         self.progressBar.configure(maximum=200)
         self.progressBar.pack(padx=10, pady=50)
 
@@ -380,6 +384,7 @@ class Window(tkinter.Frame):
     def display(self):
         print(self.progressBar["value"])
         logging.info("Valor: %i", self.progressBar["value"])
+
     def button_clicked(self):
         print('Button clicked')
         logging.info("Botón 3 pulsado.")
@@ -387,13 +392,20 @@ class Window(tkinter.Frame):
 
 
 logging.basicConfig(filename="../GeneticV2/log/geneticV2.log", level=logging.DEBUG,
-format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
+                    format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 logging.warning("Inicio GeneticLog write!!!")
+
+sqliteConnection = sqlite3.connect("db/dbGenetic.db")
+cursor = sqliteConnection.cursor()
+logging.info("Successfully Connected to SQLite")
 
 root = Tk()
 window = Window(root)
 root.mainloop()
 
+sqliteConnection.close()
+logging.info("The SQLite connection is closed")
 
 # Create two reference solutions 
 # (this is used just to illustrate GAs)
